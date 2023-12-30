@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ToDo List!</title>
+    <style>
+        body {
+            background-image: url('Book.jpg');
+            background-size: cover; 
+            background-repeat: repeat;
+        }
+        h1 {
+    text-align: center;
+        }
+        .priority {
+            color: #FF8C00;
+        }
+        .due-date {
+            color: #eae8ed;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Add a new task">
+        <input type="date" id="dueDateInput">
+        <select id="priorityInput">
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+        </select>
+        <button class="add" id="addTask">Add</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById("taskInput");
+        const dueDateInput = document.getElementById("dueDateInput");
+        const priorityInput = document.getElementById("priorityInput");
+        const addTaskButton = document.getElementById("addTask");
+        const taskList = document.getElementById("taskList");
+
+        addTaskButton.addEventListener("click", addTask);
+
+        // Initialize tasks from local storage
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        // Load tasks from local storage
+        function loadTasks() {
+            taskList.innerHTML = "";
+            tasks.sort((a, b) => {
+                return a.priority.localeCompare(b.priority);
+            });
+            for (let i = 0; i < tasks.length; i++) {
+                createTaskElement(i, tasks[i].task, tasks[i].completed, tasks[i].dueDate, tasks[i].priority);
+            }
+        }
+
+        // Create a task element
+        function createTaskElement(index, task, completed, dueDate, priority) {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span class="${completed ? 'completed' : ''}">${task}</span>
+                <span class="due-date">Due: ${dueDate}</span>
+                <span class="priority">${priority} Priority</span>
+                <button class="delete" onclick="deleteTask(${index})">Delete</button>
+                <button class="complete" onclick="completeTask(${index})">Complete</button>
+            `;
+            taskList.appendChild(li);
+        }
+
+        // Add a new task
+        function addTask() {
+            const newTask = taskInput.value.trim();
+            if (newTask === "") return;
+
+            const dueDate = dueDateInput.value;
+            const priority = priorityInput.value;
+
+            tasks.push({ task: newTask, completed: false, dueDate, priority });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            createTaskElement(tasks.length - 1, newTask, false, dueDate, priority);
+            taskInput.value = "";
+            dueDateInput.value = "";
+        }
+
+        // Delete a task
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        // Mark a task as completed
+        function completeTask(index) {
+            tasks[index].completed = true;
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+        loadTasks();
+    </script>
+</body>
+</html>
